@@ -19,30 +19,38 @@ black = RGBColor(0, 0, 0)
 DRAM0 = cli.get_devices_by_type(DeviceType.DRAM)[0]
 DRAM1 = cli.get_devices_by_type(DeviceType.DRAM)[1]
 
-
+DRAM0.zones[0].resize(5)
 DRAM1.zones[0].resize(5)
 
+
 ## TODO
-# Figure out multiple zone to have progression on the surface instead of filled static
 # For startup : set ram sticks to static mode before setting color. It starts up as rainbow.
 
 def get_cpu_usage_pct():
-    return psutil.cpu_percent(interval=0.5)
+    return psutil.cpu_percent(interval=0.3)
 
 def get_cpu_load():
     CPU_load = get_cpu_usage_pct()
     print(CPU_load, "% CPU LOAD")
 
     if CPU_load <= 19:
-        DRAM0.zones[0].colors[0] = green
-    if 20 < CPU_load < 39:
-        DRAM0.set_color(yellow)
-    if 40 < CPU_load < 59:
-        DRAM0.set_color(orange)
-    if 60 < CPU_load < 79:
-        DRAM0.set_color(pink)
-    if 80 < CPU_load < 100:
-        DRAM0.set_color(red)
+        DRAM0.zones[0].colors[4] = green
+    if CPU_load >= 20:
+        DRAM0.zones[0].colors[3] = yellow
+    elif CPU_load < 20:
+        DRAM0.zones[0].colors[3] = black
+    if CPU_load >= 40:
+        DRAM0.zones[0].colors[2] = orange
+    elif CPU_load < 40:
+        DRAM0.zones[0].colors[2] = black
+    if CPU_load >= 60:
+        DRAM0.zones[0].colors[1] = pink
+    elif CPU_load < 60:
+        DRAM0.zones[0].colors[1] = black
+    if CPU_load > 80:
+        DRAM0.zones[0].colors[0] = red
+    elif CPU_load < 80:
+        DRAM0.zones[0].colors[0] = black
 
 def get_load():
     GPU_load = GPUs[0].load
@@ -81,8 +89,9 @@ while True:
     GPUs = GPUtil.getGPUs()
     os.system('cls||clear')
     get_cpu_load()
+    DRAM0.zones[0].show()
     get_load()
     DRAM1.zones[0].show()
     get_memory()
     get_temps()
-    time.sleep(1)
+    time.sleep(0.5)
