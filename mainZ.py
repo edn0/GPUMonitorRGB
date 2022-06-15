@@ -19,22 +19,26 @@ black = RGBColor(0, 0, 0)
 DRAM0 = cli.get_devices_by_type(DeviceType.DRAM)[0]
 DRAM1 = cli.get_devices_by_type(DeviceType.DRAM)[1]
 
+# Each stick has 5 invidual LEDs.
 DRAM0.zones[0].resize(5)
 DRAM1.zones[0].resize(5)
-
+# Set the light mode to static.
+DRAM0.set_mode(2)
+DRAM1.set_mode(2)
+# Turns the whole sticks off to progressively light them up later.
+DRAM0.set_color(black)
+DRAM1.set_color(black)
 
 ## TODO
-# For startup : set ram sticks to static mode before setting color. It starts up as rainbow.
 
 def get_cpu_usage_pct():
     return psutil.cpu_percent(interval=0.3)
 
 def get_cpu_load():
-    CPU_load = get_cpu_usage_pct()
+    CPU_load = get_cpu_usage_pct() # function from psutils
     print(CPU_load, "% CPU LOAD")
 
-    if CPU_load <= 19:
-        DRAM0.zones[0].colors[4] = green
+    DRAM0.zones[0].colors[4] = green
     if CPU_load >= 20:
         DRAM0.zones[0].colors[3] = yellow
     elif CPU_load < 20:
@@ -52,16 +56,16 @@ def get_cpu_load():
     elif CPU_load < 80:
         DRAM0.zones[0].colors[0] = black
 
-def get_load():
+def get_gpu_load():
     GPU_load = GPUs[0].load
     print(GPU_load*100, "% GPU LOAD")
 
 
-def get_temps():
+def get_gpu_temps():
     GPU_temp = GPUs[0].temperature
     print(GPU_temp, "°c GPU TEMP")
-    if GPU_temp <= 50:
-        DRAM1.zones[0].colors[4] = green
+
+    DRAM1.zones[0].colors[4] = green
     if GPU_temp >= 51:
         DRAM1.zones[0].colors[3] = yellow
     elif GPU_temp < 51:
@@ -86,12 +90,12 @@ def get_memory():
 
     
 while True:
-    GPUs = GPUtil.getGPUs()
-    os.system('cls||clear')
-    get_cpu_load()
-    DRAM0.zones[0].show()
-    get_load()
-    DRAM1.zones[0].show()
-    get_memory()
-    get_temps()
-    time.sleep(0.5)
+    GPUs = GPUtil.getGPUs() # Looks up all GPUs.
+    os.system('cls||clear') # Clears terminal for readability.
+    get_cpu_load() # Using psutils measure avg CPU load over given interval and sets color to RAM stick accordingly. Prints to console as well.
+    DRAM0.zones[0].show() # Apply color modification to first stick.
+    get_gpu_load() # Get GPU load and print it out.
+    get_memory() # Get VRAM usage and print it out.
+    get_gpu_temps() # Get GPU temps using GPUtil and sets color to second RAM stick. Also printed in console.
+    DRAM1.zones[0].show() # Apply color modification to second stick.
+    time.sleep(0.3) # So that it doesn't refresh so often and generate useless load.
